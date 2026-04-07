@@ -1,6 +1,6 @@
 [project]
 name = "tortoise-orm-trace-unused-fields"
-version = "0.1.0b1"
+version = "0.1.0b2"
 description = "Small hook to trace Tortoise-ORM unused fields"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -11,6 +11,11 @@ authors = [
     { name = "RuslanUC", email = "dev_ruslan_uc@protonmail.com" },
 ]
 license-files = ["COPYING"]
+
+[dependency-groups]
+dev = [
+    "yappi>=1.7.6",
+]
 
 [build-system]
 requires = ["hatchling"]

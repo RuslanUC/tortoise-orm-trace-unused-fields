@@ -1,7 +1,6 @@
 import importlib
 import importlib.abc
 import importlib.util
-import inspect
 import sys
 import weakref
 from importlib.machinery import ModuleSpec
@@ -47,21 +46,23 @@ class SomeClassMeta(type):
         def __new__(clss, *args, **kwargs) -> ...:
             tortoise_root = Path(sys.modules["tortoise"].__file__).parent
 
-            frames = inspect.stack()
+            caller_frame = sys._getframe(1)
             instance = object.__new__(clss)
-            if len(frames) >= 2 \
-                    and frames[1].function != "create" \
-                    and Path(frames[1].filename).is_relative_to(tortoise_root):
+            if caller_frame is not None \
+                    and caller_frame.f_code.co_name != "create" \
+                    and Path(caller_frame.f_code.co_filename).is_relative_to(tortoise_root):
                 setattr(instance, TRACING_ATTRS_NAME, set())
 
                 init_frame = None
-                for frame in frames[1:]:
-                    if not Path(frame.filename).is_relative_to(tortoise_root):
+                frame = caller_frame
+                while frame.f_back is not None:
+                    if not Path(frame.f_code.co_filename).is_relative_to(tortoise_root):
                         init_frame = frame
                         break
+                    frame = frame.f_back
 
                 if init_frame is not None:
-                    setattr(instance, TRACING_ATTRS_LOC_NAME, (init_frame.filename, init_frame.lineno))
+                    setattr(instance, TRACING_ATTRS_LOC_NAME, (init_frame.f_code.co_filename, init_frame.f_lineno))
 
             weakref.finalize(instance, cls._finalize, instance)
             return instance

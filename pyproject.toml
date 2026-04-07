@@ -1,0 +1,29 @@
+[project]
+name = "tortoise-orm-trace-unused-fields"
+version = "0.1.0b1"
+description = "Small hook to trace Tortoise-ORM unused fields"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "tortoise-orm (>=1.0.0,<2)",
+]
+authors = [
+    { name = "RuslanUC", email = "dev_ruslan_uc@protonmail.com" },
+]
+license-files = ["COPYING"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = ["tortoise_trace_unused/*"]
+
+[tool.hatch.build.hooks.autorun]
+dependencies = ["hatch-autorun"]
+code = """
+import os
+import tortoise_trace_unused
+if os.environ.get("TORTOISE_TRACE_UNUSED_FIELDS", "").lower() in ("1", "true"):
+    tortoise_trace_unused.hook_tortoise()
+"""
